@@ -1,0 +1,11 @@
+{
+  "title": "COMET",
+  "description": "Connect with a vibrant community of tech enthusiasts, participate in hackathons, workshops, and projects to enhance your skills and gain practical experience.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
