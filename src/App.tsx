@@ -1,19 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
-import * as THREE from 'three'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import cometLogo from '@/imports/comet_logo.png'
+import { useEffect, useRef, useState } from "react"
+import * as THREE from "three"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import cometLogo from "@/imports/comet_logo-removebg-preview.png"
 
 gsap.registerPlugin(ScrollTrigger)
 
-const ORANGE = '#ff8100'
+const ORANGE = "#ff8100"
 const ORANGE_N = 0xff8100
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 // ─── Three.js helpers ─────────────────────────────────────────────────────────
 
-function makeRing(radius: number, segments: number, color: number, opacity: number) {
+function makeRing(
+  radius: number,
+  segments: number,
+  color: number,
+  opacity: number,
+) {
   const pts: THREE.Vector3[] = []
   for (let i = 0; i <= segments; i++) {
     const a = (i / segments) * Math.PI * 2
@@ -25,13 +30,29 @@ function makeRing(radius: number, segments: number, color: number, opacity: numb
 
 function makeCrosshair3D(size: number, opacity = 0.55): THREE.Group {
   const g = new THREE.Group()
-  const mat = new THREE.LineBasicMaterial({ color: ORANGE_N, transparent: true, opacity })
+  const mat = new THREE.LineBasicMaterial({
+    color: ORANGE_N,
+    transparent: true,
+    opacity,
+  })
   const gap = size * 0.3
   const segs: [[number, number, number], [number, number, number]][] = [
-    [[-size, 0, 0], [-gap, 0, 0]],
-    [[gap, 0, 0], [size, 0, 0]],
-    [[0, -size, 0], [0, -gap, 0]],
-    [[0, gap, 0], [0, size, 0]],
+    [
+      [-size, 0, 0],
+      [-gap, 0, 0],
+    ],
+    [
+      [gap, 0, 0],
+      [size, 0, 0],
+    ],
+    [
+      [0, -size, 0],
+      [0, -gap, 0],
+    ],
+    [
+      [0, gap, 0],
+      [0, size, 0],
+    ],
   ]
   for (const [a, b] of segs) {
     const geo = new THREE.BufferGeometry().setFromPoints([
@@ -40,9 +61,18 @@ function makeCrosshair3D(size: number, opacity = 0.55): THREE.Group {
     ])
     g.add(new THREE.Line(geo, mat.clone()))
   }
-  const dm = new THREE.MeshBasicMaterial({ color: ORANGE_N, transparent: true, opacity })
+  const dm = new THREE.MeshBasicMaterial({
+    color: ORANGE_N,
+    transparent: true,
+    opacity,
+  })
   const dg = new THREE.SphereGeometry(size * 0.1, 5, 5)
-  for (const p of [[-size, 0, 0], [size, 0, 0], [0, -size, 0], [0, size, 0]] as [number, number, number][]) {
+  for (const p of [
+    [-size, 0, 0],
+    [size, 0, 0],
+    [0, -size, 0],
+    [0, size, 0],
+  ] as [number, number, number][]) {
     const dot = new THREE.Mesh(dg, dm.clone())
     dot.position.set(...p)
     g.add(dot)
@@ -53,32 +83,76 @@ function makeCrosshair3D(size: number, opacity = 0.55): THREE.Group {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const ACTIVITIES = [
-  { tag: 'HACK', label: 'Hackathons', desc: 'Build fast, ship real. Multi-day intense events where teams create working products from scratch under pressure.' },
-  { tag: 'CODE', label: 'Coding Competitions', desc: 'Algorithm challenges, competitive programming, and inter-college battles to sharpen your edge.' },
-  { tag: 'WORK', label: 'Workshops', desc: 'Hands-on sessions by peers and professionals — tools, frameworks, and emerging tech, practically taught.' },
-  { tag: 'SHIP', label: 'Real-World Projects', desc: 'Ship products that actually matter. Build software used by real people, not just your professor.' },
-  { tag: 'CHAL', label: 'Technical Challenges', desc: 'Weekly and monthly challenges that keep your skills sharp and your portfolio growing continuously.' },
-  { tag: 'INDX', label: 'Industry Activities', desc: 'Connect with companies, attend engineer talks, and build relationships that open real career doors.' },
+  {
+    tag: "HACK",
+    label: "Hackathons",
+    desc: "Build fast, ship real. Multi-day intense events where teams create working products from scratch under pressure.",
+  },
+  {
+    tag: "CODE",
+    label: "Coding Competitions",
+    desc: "Algorithm challenges, competitive programming, and inter-college battles to sharpen your edge.",
+  },
+  {
+    tag: "WORK",
+    label: "Workshops",
+    desc: "Hands-on sessions by peers and professionals — tools, frameworks, and emerging tech, practically taught.",
+  },
+  {
+    tag: "SHIP",
+    label: "Real-World Projects",
+    desc: "Ship products that actually matter. Build software used by real people, not just your professor.",
+  },
+  {
+    tag: "CHAL",
+    label: "Technical Challenges",
+    desc: "Weekly and monthly challenges that keep your skills sharp and your portfolio growing continuously.",
+  },
+  {
+    tag: "INDX",
+    label: "Industry Activities",
+    desc: "Connect with companies, attend engineer talks, and build relationships that open real career doors.",
+  },
 ]
 
 const STATS = [
-  { value: '200+', label: 'Active Members' },
-  { value: '30+', label: 'Events Yearly' },
-  { value: '15+', label: 'Industry Partners' },
-  { value: '5', label: 'Years Running' },
+  { value: "25+", label: "Active Members" },
+  { value: "10+", label: "Events Yearly" },
+  { value: "20+", label: "Industry Partners" },
+  { value: "9+", label: "Years Running" },
 ]
 
 const PRIZES = [
-  { title: 'Grand Prize', desc: 'Biggest audience traction and growth momentum — cash and a Times Square billboard', tag: 'Cash + Billboard' },
-  { title: '#BuildInPublic Award', desc: 'For the builder who documents and shares their journey publicly throughout the event', tag: 'Recognition' },
-  { title: 'Next Gen Award', desc: 'Exclusive prize category for student builders — no developer account required', tag: 'Students Only' },
-  { title: 'Best Game Award', desc: 'Top game app with the biggest positive player impact and most creative mechanics', tag: 'Gaming' },
-  { title: 'Conflict of Interest', desc: 'Most creative revenue model — for student submissions that surprise the judges', tag: 'Business' },
+  {
+    title: "Zenesys Merch",
+    desc: "Exclusive merchandise and recognition awarded to the top-performing teams at Zenesys 2026.",
+    tag: "Top Teams",
+  },
+  {
+    title: "Participation Certificate",
+    desc: "Official participation certificates for every team that completes the 12-hour competition.",
+    tag: "All Participants",
+  },
+  {
+    title: "LinkedIn Recognition",
+    desc: "Professional recognition posts for participants and winning teams on LinkedIn.",
+    tag: "Professional",
+  },
+  {
+    title: "ERP Olympics Qualifier",
+    desc: "Top teams earn the right to represent GHRCEM Pune at the 48-hour ERP Olympics 2026 global stage.",
+    tag: "Global Stage",
+  },
+  {
+    title: "$1,500 Prize Pool",
+    desc: "Winners advance to ERP Olympics 2026 and compete for a massive global prize pool with internship opportunities.",
+    tag: "ERP Olympics",
+  },
 ]
 
 // ─── Scramble text ────────────────────────────────────────────────────────────
 
-const SCRAMBLE_POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!$%&*<>?/'
+const SCRAMBLE_POOL = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!$%&*<>?/"
 
 function ScrambleLetter({
   char,
@@ -91,7 +165,7 @@ function ScrambleLetter({
   duration?: number
   targetColor: string
 }) {
-  const [display, setDisplay] = useState(' ')
+  const [display, setDisplay] = useState(" ")
   const [locked, setLocked] = useState(false)
 
   useEffect(() => {
@@ -99,7 +173,7 @@ function ScrambleLetter({
     let start: number | null = null
 
     const tid = setTimeout(() => {
-      if (char === '.') {
+      if (char === ".") {
         setDisplay(char)
         setLocked(true)
         return
@@ -112,7 +186,9 @@ function ScrambleLetter({
           setLocked(true)
           return
         }
-        setDisplay(SCRAMBLE_POOL[Math.floor(Math.random() * SCRAMBLE_POOL.length)])
+        setDisplay(
+          SCRAMBLE_POOL[Math.floor(Math.random() * SCRAMBLE_POOL.length)],
+        )
         rafId = requestAnimationFrame(tick)
       }
       rafId = requestAnimationFrame(tick)
@@ -127,10 +203,10 @@ function ScrambleLetter({
   return (
     <span
       style={{
-        display: 'inline-block',
+        display: "inline-block",
         color: locked ? targetColor : ORANGE,
-        transition: locked ? 'color 0.12s ease' : 'none',
-        fontVariantNumeric: 'tabular-nums',
+        transition: locked ? "color 0.12s ease" : "none",
+        fontVariantNumeric: "tabular-nums",
       }}
     >
       {display}
@@ -149,12 +225,12 @@ function ScrambleWord({
 }) {
   return (
     <>
-      {word.split('').map((char, i) => (
+      {word.split("").map((char, i) => (
         <ScrambleLetter
           key={i}
           char={char}
           delay={startDelay + i * 52}
-          duration={char === '.' ? 0 : 300}
+          duration={char === "." ? 0 : 300}
           targetColor={color}
         />
       ))}
@@ -164,13 +240,57 @@ function ScrambleWord({
 
 // ─── SVG Crosshair (HTML) ─────────────────────────────────────────────────────
 
-function CrosshairSVG({ size = 24, className = '' }: { size?: number; className?: string }) {
+function CrosshairSVG({
+  size = 24,
+  className = "",
+}: {
+  size?: number
+  className?: string
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" className={className}>
-      <line x1="20" y1="2" x2="20" y2="15" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="20" y1="25" x2="20" y2="38" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="2" y1="20" x2="15" y2="20" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="25" y1="20" x2="38" y2="20" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round" />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      className={className}
+    >
+      <line
+        x1="20"
+        y1="2"
+        x2="20"
+        y2="15"
+        stroke={ORANGE}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="20"
+        y1="25"
+        x2="20"
+        y2="38"
+        stroke={ORANGE}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="2"
+        y1="20"
+        x2="15"
+        y2="20"
+        stroke={ORANGE}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="25"
+        y1="20"
+        x2="38"
+        y2="20"
+        stroke={ORANGE}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
       <circle cx="20" cy="2" r="2" fill={ORANGE} />
       <circle cx="20" cy="38" r="2" fill={ORANGE} />
       <circle cx="2" cy="20" r="2" fill={ORANGE} />
@@ -193,11 +313,24 @@ export default function App() {
   const [activeActivity, setActiveActivity] = useState(0)
   const isMobile = window.innerWidth < 768
 
+  // Set favicon from the imported logo asset
+  useEffect(() => {
+    let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (!link) {
+      link = document.createElement("link")
+      link.rel = "icon"
+      document.head.appendChild(link)
+    }
+    link.type = "image/png"
+    link.href = cometLogo
+  }, [])
+
   // Nav transparency: stays invisible over the 3D hero, solidifies over content
   useEffect(() => {
-    const onScroll = () => setNavSolid(window.scrollY > window.innerHeight * 2.5)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const onScroll = () =>
+      setNavSolid(window.scrollY > window.innerHeight * 2.5)
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
   // ── Three.js + GSAP scroll engine ──────────────────────────────────────────
@@ -205,10 +338,15 @@ export default function App() {
     if (isMobile || !canvasRef.current || !heroRef.current) return
 
     const canvas = canvasRef.current
-    let W = window.innerWidth, H = window.innerHeight
+    let W = window.innerWidth,
+      H = window.innerHeight
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+    })
     renderer.setSize(W, H)
     renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
 
@@ -221,13 +359,19 @@ export default function App() {
     const N = 2600
     const pPos = new Float32Array(N * 3)
     for (let i = 0; i < N; i++) {
-      pPos[i * 3]     = (Math.random() - 0.5) * 80
+      pPos[i * 3] = (Math.random() - 0.5) * 80
       pPos[i * 3 + 1] = (Math.random() - 0.5) * 45
       pPos[i * 3 + 2] = (Math.random() - 0.5) * 80
     }
     const pGeo = new THREE.BufferGeometry()
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3))
-    const pMat = new THREE.PointsMaterial({ size: 0.04, color: 0xfff7ec, transparent: true, opacity: 0.35, sizeAttenuation: true })
+    pGeo.setAttribute("position", new THREE.BufferAttribute(pPos, 3))
+    const pMat = new THREE.PointsMaterial({
+      size: 0.04,
+      color: 0xfff7ec,
+      transparent: true,
+      opacity: 0.35,
+      sizeAttenuation: true,
+    })
     const particles = new THREE.Points(pGeo, pMat)
     scene.add(particles)
 
@@ -247,77 +391,136 @@ export default function App() {
 
     // ── Floating crosshairs ────────────────────────────────────────────────
     const chDefs: [number, number, number][] = [
-      [4.5, 2, 1], [-3.5, -1.5, 0], [5.5, -3, -4], [-4.5, 3.5, -3],
-      [2.5, 4, -8], [-2, -4.5, -7], [6.5, -0.5, -13], [-5.5, 2.5, -16],
+      [4.5, 2, 1],
+      [-3.5, -1.5, 0],
+      [5.5, -3, -4],
+      [-4.5, 3.5, -3],
+      [2.5, 4, -8],
+      [-2, -4.5, -7],
+      [6.5, -0.5, -13],
+      [-5.5, 2.5, -16],
     ]
     const crosshairs = chDefs.map(([x, y, z], i) => {
       const size = 0.28 + (i % 3) * 0.18
       const ch = makeCrosshair3D(size, 0.3 + Math.random() * 0.35)
       ch.position.set(x, y, z)
-      ch.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
+      ch.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+      )
       scene.add(ch)
       return { mesh: ch, speed: 0.4 + Math.random() * 0.7 }
     })
 
     // ── Scroll state ───────────────────────────────────────────────────────
-    let targetP = 0, currentP = 0
+    let targetP = 0,
+      currentP = 0
 
     ScrollTrigger.create({
       trigger: heroRef.current,
-      start: 'top top',
-      end: 'bottom bottom',
-      onUpdate: (self) => { targetP = self.progress },
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate: (self) => {
+        targetP = self.progress
+      },
     })
 
     // ── Hero HTML — label/tagline/cta on load; scramble handles the words ────
-    gsap.set('.hero-label', { opacity: 0, y: -14 })
-    gsap.set('.hero-tagline', { opacity: 0, y: 18 })
-    gsap.set('.hero-cta-group', { opacity: 0, y: 12 })
-    gsap.set('.hero-hint', { opacity: 0 })
+    gsap.set(".hero-label", { opacity: 0, y: -14 })
+    gsap.set(".hero-tagline", { opacity: 0, y: 18 })
+    gsap.set(".hero-cta-group", { opacity: 0, y: 12 })
+    gsap.set(".hero-hint", { opacity: 0 })
 
     const entranceTl = gsap.timeline({ delay: 0.15 })
     entranceTl
-      .to('.hero-label', { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
-      .to('.hero-tagline', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 1.65)
-      .to('.hero-cta-group', { opacity: 1, y: 0, duration: 0.55, ease: 'power2.out' }, '-=0.35')
-      .to('.hero-hint', { opacity: 0.3, duration: 0.5 }, '-=0.2')
+      .to(".hero-label", {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      })
+      .to(
+        ".hero-tagline",
+        { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" },
+        1.65,
+      )
+      .to(
+        ".hero-cta-group",
+        { opacity: 1, y: 0, duration: 0.55, ease: "power2.out" },
+        "-=0.35",
+      )
+      .to(".hero-hint", { opacity: 0.3, duration: 0.5 }, "-=0.2")
 
     // ── Section reveals ────────────────────────────────────────────────────
-    gsap.set('.about-text-block', { opacity: 0, x: -55 })
-    gsap.set('.about-image-wrap', { opacity: 0, x: 55 })
+    gsap.set(".about-text-block", { opacity: 0, x: -55 })
+    gsap.set(".about-image-wrap", { opacity: 0, x: 55 })
     ScrollTrigger.create({
-      trigger: '#about',
-      start: 'top 74%',
+      trigger: "#about",
+      start: "top 74%",
       onEnter: () => {
-        gsap.to('.about-text-block', { opacity: 1, x: 0, duration: 1.1, ease: 'power3.out' })
-        gsap.to('.about-image-wrap', { opacity: 1, x: 0, duration: 1.1, delay: 0.15, ease: 'power3.out' })
+        gsap.to(".about-text-block", {
+          opacity: 1,
+          x: 0,
+          duration: 1.1,
+          ease: "power3.out",
+        })
+        gsap.to(".about-image-wrap", {
+          opacity: 1,
+          x: 0,
+          duration: 1.1,
+          delay: 0.15,
+          ease: "power3.out",
+        })
       },
     })
 
-    gsap.set('.activity-card', { opacity: 0, y: 30 })
+    gsap.set(".activity-card", { opacity: 0, y: 30 })
     ScrollTrigger.create({
-      trigger: '#activities',
-      start: 'top 66%',
+      trigger: "#activities",
+      start: "top 66%",
       onEnter: () =>
-        gsap.to('.activity-card', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }),
+        gsap.to(".activity-card", {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+        }),
     })
 
-    gsap.set('.shipaton-left', { opacity: 0, x: -55 })
-    gsap.set('.shipaton-right', { opacity: 0, x: 55 })
+    gsap.set(".shipaton-left", { opacity: 0, x: -55 })
+    gsap.set(".shipaton-right", { opacity: 0, x: 55 })
     ScrollTrigger.create({
-      trigger: '#shipaton',
-      start: 'top 72%',
+      trigger: "#shipaton",
+      start: "top 72%",
       onEnter: () => {
-        gsap.to('.shipaton-left', { opacity: 1, x: 0, duration: 1.1, ease: 'power3.out' })
-        gsap.to('.shipaton-right', { opacity: 1, x: 0, duration: 1.1, delay: 0.18, ease: 'power3.out' })
+        gsap.to(".shipaton-left", {
+          opacity: 1,
+          x: 0,
+          duration: 1.1,
+          ease: "power3.out",
+        })
+        gsap.to(".shipaton-right", {
+          opacity: 1,
+          x: 0,
+          duration: 1.1,
+          delay: 0.18,
+          ease: "power3.out",
+        })
       },
     })
 
-    gsap.set('.join-inner', { opacity: 0, y: 40 })
+    gsap.set(".join-inner", { opacity: 0, y: 40 })
     ScrollTrigger.create({
-      trigger: '#join',
-      start: 'top 75%',
-      onEnter: () => gsap.to('.join-inner', { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out' }),
+      trigger: "#join",
+      start: "top 75%",
+      onEnter: () =>
+        gsap.to(".join-inner", {
+          opacity: 1,
+          y: 0,
+          duration: 1.1,
+          ease: "power3.out",
+        }),
     })
 
     // ── RAF loop ───────────────────────────────────────────────────────────
@@ -338,16 +541,20 @@ export default function App() {
       camera.position.y = Math.cos(elapsed * 0.17) * 0.13 * (1 - p * 0.75)
       camera.rotation.z = Math.sin(elapsed * 0.14) * 0.012
 
-      const r1Op = p < 0.38
-        ? lerp(0, 0.22, p / 0.38)
-        : Math.max(0, 0.22 - (p - 0.38) * 0.55)
+      const r1Op =
+        p < 0.38
+          ? lerp(0, 0.22, p / 0.38)
+          : Math.max(0, 0.22 - (p - 0.38) * 0.55)
       ;(ring1.material as THREE.LineBasicMaterial).opacity = r1Op
       ring1.rotation.z = elapsed * 0.042 + p * 0.9
       ring1.scale.setScalar(1 + p * 0.08)
-
-      ;(ring2.material as THREE.LineBasicMaterial).opacity = Math.min(0.8, p * 1.05)
+      ;(ring2.material as THREE.LineBasicMaterial).opacity = Math.min(
+        0.8,
+        p * 1.05,
+      )
       ring2.rotation.y = elapsed * 0.026 + p * 0.5
-      ring2.rotation.x = Math.PI * 0.28 + Math.sin(elapsed * 0.15) * 0.05 + p * 0.2
+      ring2.rotation.x =
+        Math.PI * 0.28 + Math.sin(elapsed * 0.15) * 0.05 + p * 0.2
 
       ring3.rotation.z = elapsed * 0.012
 
@@ -367,12 +574,13 @@ export default function App() {
 
     // Resize
     const onResize = () => {
-      W = window.innerWidth; H = window.innerHeight
+      W = window.innerWidth
+      H = window.innerHeight
       camera.aspect = W / H
       camera.updateProjectionMatrix()
       renderer.setSize(W, H)
     }
-    window.addEventListener('resize', onResize)
+    window.addEventListener("resize", onResize)
 
     return () => {
       cancelAnimationFrame(rafId)
@@ -380,15 +588,21 @@ export default function App() {
       pGeo.dispose()
       pMat.dispose()
       renderer.dispose()
-      window.removeEventListener('resize', onResize)
+      window.removeEventListener("resize", onResize)
     }
   }, [isMobile])
 
   // ── JSX ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="overflow-x-hidden" style={{ background: '#171326', color: '#fff7ec', fontFamily: 'Inter, sans-serif' }}>
-
+    <div
+      className="overflow-x-hidden"
+      style={{
+        background: "#171326",
+        color: "#fff7ec",
+        fontFamily: "Inter, sans-serif",
+      }}
+    >
       {/* Three.js canvas — fixed background, behind everything */}
       {!isMobile && (
         <canvas
@@ -402,25 +616,41 @@ export default function App() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
         style={{
-          background: navSolid ? 'rgba(23,19,38,0.97)' : 'rgba(23,19,38,0.85)',
-          backdropFilter: navSolid ? 'blur(14px)' : 'none',
-          borderBottom: navSolid ? '1px solid #3d2e52' : '1px solid transparent',
+          background: navSolid ? "rgba(23,19,38,0.97)" : "rgba(23,19,38,0.85)",
+          backdropFilter: navSolid ? "blur(14px)" : "none",
+          borderBottom: navSolid
+            ? "1px solid #3d2e52"
+            : "1px solid transparent",
         }}
       >
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
           <a href="#" className="flex items-center">
-            <img src={cometLogo} alt="COMET" className="h-8 w-auto" />
+            <img
+              src={cometLogo}
+              alt="COMET"
+              style={{
+                width: 300,
+                height: 300,
+                objectFit: "contain",
+                position: "relative",
+              }}
+            />
           </a>
 
           <div className="hidden md:flex items-center gap-8">
-            {([['About', '#about'], ['Activities', '#activities'], ['Events', '#shipaton'], ['Join', '#join']] as const).map(([label, href]) => (
+            {([
+              ["About", "#about"],
+              ["Activities", "#activities"],
+              ["Events", "#shipaton"],
+              ["Join", "#join"],
+            ] as const).map(([label, href]) => (
               <a
                 key={label}
                 href={href}
                 className="text-sm transition-colors duration-200"
-                style={{ color: '#a89280' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
+                style={{ color: "#a89280" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#fff7ec")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#a89280")}
               >
                 {label}
               </a>
@@ -430,7 +660,7 @@ export default function App() {
           <a
             href="#join"
             className="hidden md:block px-5 py-2 text-sm font-semibold rounded transition-all hover:brightness-110 active:scale-95"
-            style={{ background: ORANGE, color: '#171326' }}
+            style={{ background: ORANGE, color: "#171326" }}
           >
             Join COMET
           </a>
@@ -441,21 +671,44 @@ export default function App() {
             aria-label="Toggle menu"
           >
             <div className="w-5 flex flex-col gap-1">
-              <span className={`block h-0.5 transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`} style={{ background: '#ddcbbc' }} />
-              <span className={`block h-0.5 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} style={{ background: '#ddcbbc' }} />
-              <span className={`block h-0.5 transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} style={{ background: '#ddcbbc' }} />
+              <span
+                className={`block h-0.5 transition-all duration-200 ${
+                  menuOpen ? "rotate-45 translate-y-1.5" : ""
+                }`}
+                style={{ background: "#ddcbbc" }}
+              />
+              <span
+                className={`block h-0.5 transition-all duration-200 ${
+                  menuOpen ? "opacity-0" : ""
+                }`}
+                style={{ background: "#ddcbbc" }}
+              />
+              <span
+                className={`block h-0.5 transition-all duration-200 ${
+                  menuOpen ? "-rotate-45 -translate-y-1.5" : ""
+                }`}
+                style={{ background: "#ddcbbc" }}
+              />
             </div>
           </button>
         </div>
 
         {menuOpen && (
-          <div className="md:hidden px-5 py-4 flex flex-col gap-4" style={{ background: '#171326', borderTop: '1px solid #3d2e52' }}>
-            {([['About', '#about'], ['Activities', '#activities'], ['Events', '#shipaton'], ['Join', '#join']] as const).map(([label, href]) => (
+          <div
+            className="md:hidden px-5 py-4 flex flex-col gap-4"
+            style={{ background: "#171326", borderTop: "1px solid #3d2e52" }}
+          >
+            {([
+              ["About", "#about"],
+              ["Activities", "#activities"],
+              ["Events", "#shipaton"],
+              ["Join", "#join"],
+            ] as const).map(([label, href]) => (
               <a
                 key={label}
                 href={href}
                 className="text-sm"
-                style={{ color: '#a89280' }}
+                style={{ color: "#a89280" }}
                 onClick={() => setMenuOpen(false)}
               >
                 {label}
@@ -464,7 +717,7 @@ export default function App() {
             <a
               href="#join"
               className="px-5 py-2 text-sm font-semibold rounded text-center"
-              style={{ background: ORANGE, color: '#171326' }}
+              style={{ background: ORANGE, color: "#171326" }}
               onClick={() => setMenuOpen(false)}
             >
               Join COMET
@@ -476,18 +729,23 @@ export default function App() {
       {/* ── HERO — 300vh pinned, scroll drives the 3D scene ─────────────────── */}
       <div
         ref={heroRef}
-        style={{ height: isMobile ? '100vh' : '300vh', position: 'relative', zIndex: 1 }}
+        style={{
+          height: isMobile ? "100vh" : "300vh",
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         <div
           className="sticky top-0 h-screen overflow-hidden"
-          style={{ perspective: '1000px' }}
+          style={{ perspective: "1000px" }}
         >
           {/* Subtle scanline overlay */}
           {!isMobile && (
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px)',
+                backgroundImage:
+                  "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px)",
                 zIndex: 2,
               }}
             />
@@ -497,12 +755,15 @@ export default function App() {
           {isMobile && (
             <div
               className="absolute inset-0"
-              style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,129,0,0.1) 0%, transparent 70%)' }}
+              style={{
+                background:
+                  "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,129,0,0.1) 0%, transparent 70%)",
+              }}
             />
           )}
 
           <div
-            className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-center"
+            className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-center pb-24"
             style={{ top: 64, zIndex: 3 }}
           >
             {/* Label */}
@@ -510,7 +771,10 @@ export default function App() {
               <CrosshairSVG size={15} />
               <span
                 className="text-xs uppercase tracking-widest"
-                style={{ color: ORANGE, fontFamily: 'JetBrains Mono, monospace' }}
+                style={{
+                  color: ORANGE,
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
               >
                 Computer Dept. — Technical Club
               </span>
@@ -521,9 +785,9 @@ export default function App() {
               <div
                 className="font-black block leading-none"
                 style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontSize: 'clamp(3.8rem, 12vw, 10rem)',
-                  letterSpacing: '-0.02em',
+                  fontFamily: "Barlow Condensed, sans-serif",
+                  fontSize: "clamp(3.8rem, 12vw, 10rem)",
+                  letterSpacing: "-0.02em",
                 }}
               >
                 <ScrambleWord word="LEARN." startDelay={250} color="#fff7ec" />
@@ -531,9 +795,9 @@ export default function App() {
               <div
                 className="font-black block leading-none"
                 style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontSize: 'clamp(3.8rem, 12vw, 10rem)',
-                  letterSpacing: '-0.02em',
+                  fontFamily: "Barlow Condensed, sans-serif",
+                  fontSize: "clamp(3.8rem, 12vw, 10rem)",
+                  letterSpacing: "-0.02em",
                 }}
               >
                 <ScrambleWord word="BUILD." startDelay={620} color={ORANGE} />
@@ -541,25 +805,29 @@ export default function App() {
               <div
                 className="font-black block leading-none"
                 style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontSize: 'clamp(3.8rem, 12vw, 10rem)',
-                  letterSpacing: '-0.02em',
+                  fontFamily: "Barlow Condensed, sans-serif",
+                  fontSize: "clamp(3.8rem, 12vw, 10rem)",
+                  letterSpacing: "-0.02em",
                 }}
               >
-                <ScrambleWord word="INNOVATE." startDelay={980} color="#fff7ec" />
+                <ScrambleWord
+                  word="INNOVATE."
+                  startDelay={980}
+                  color="#fff7ec"
+                />
               </div>
             </div>
 
             {/* Tagline */}
             <div className="hero-tagline mt-9 flex flex-wrap gap-x-8 gap-y-2 justify-center">
-              {['Learn.', 'Build.', 'Compete.', 'Innovate.'].map((w, i) => (
+              {["Learn.", "Build.", "Compete.", "Innovate."].map((w, i) => (
                 <span
                   key={w}
                   className="font-black text-xl md:text-2xl"
                   style={{
-                    fontFamily: 'Barlow Condensed, sans-serif',
-                    color: i === 3 ? ORANGE : '#3d2e52',
-                    letterSpacing: '0.04em',
+                    fontFamily: "Barlow Condensed, sans-serif",
+                    color: i === 3 ? ORANGE : "#3d2e52",
+                    letterSpacing: "0.04em",
                   }}
                 >
                   {w}
@@ -572,16 +840,20 @@ export default function App() {
               <a
                 href="#join"
                 className="px-8 py-3.5 text-sm font-semibold rounded transition-all hover:brightness-110 active:scale-95"
-                style={{ background: ORANGE, color: '#171326' }}
+                style={{ background: ORANGE, color: "#171326" }}
               >
                 Join COMET →
               </a>
               <a
                 href="#about"
                 className="px-8 py-3.5 text-sm font-semibold rounded transition-colors"
-                style={{ border: '1px solid #5f4c66', color: '#a89280', background: 'transparent' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
+                style={{
+                  border: "1px solid #5f4c66",
+                  color: "#a89280",
+                  background: "transparent",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#fff7ec")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#a89280")}
               >
                 Learn More
               </a>
@@ -592,11 +864,19 @@ export default function App() {
           <div className="hero-hint absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none">
             <span
               className="text-xs uppercase tracking-widest"
-              style={{ color: '#4a3865', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{
+                color: "#4a3865",
+                fontFamily: "JetBrains Mono, monospace",
+              }}
             >
               scroll
             </span>
-            <div className="w-px h-9" style={{ background: 'linear-gradient(to bottom, #5f4c66, transparent)' }} />
+            <div
+              className="w-px h-9"
+              style={{
+                background: "linear-gradient(to bottom, #5f4c66, transparent)",
+              }}
+            />
           </div>
         </div>
       </div>
@@ -604,7 +884,13 @@ export default function App() {
       {/* ── STATS ─────────────────────────────────────────────────────────────── */}
       <section
         className="py-14"
-        style={{ background: '#1e1530', borderTop: '1px solid #3d2e52', borderBottom: '1px solid #3d2e52', position: 'relative', zIndex: 2 }}
+        style={{
+          background: "#1e1530",
+          borderTop: "1px solid #3d2e52",
+          borderBottom: "1px solid #3d2e52",
+          position: "relative",
+          zIndex: 2,
+        }}
       >
         <div className="max-w-6xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map((s) => (
@@ -612,8 +898,8 @@ export default function App() {
               <div
                 className="font-black mb-1"
                 style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontSize: 'clamp(2.4rem, 5vw, 3.5rem)',
+                  fontFamily: "Barlow Condensed, sans-serif",
+                  fontSize: "clamp(2.4rem, 5vw, 3.5rem)",
                   color: ORANGE,
                   lineHeight: 1,
                 }}
@@ -622,7 +908,10 @@ export default function App() {
               </div>
               <div
                 className="text-xs uppercase tracking-widest"
-                style={{ color: '#9a8878', fontFamily: 'JetBrains Mono, monospace' }}
+                style={{
+                  color: "#9a8878",
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
               >
                 {s.label}
               </div>
@@ -635,14 +924,17 @@ export default function App() {
       <section
         id="about"
         className="py-28"
-        style={{ background: '#171326', position: 'relative', zIndex: 2 }}
+        style={{ background: "#171326", position: "relative", zIndex: 2 }}
       >
         <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-16 items-center">
           <div className="about-text-block">
             <div className="flex items-center gap-2 mb-6">
               <span
                 className="text-xs font-medium uppercase tracking-widest"
-                style={{ color: ORANGE, fontFamily: 'JetBrains Mono, monospace' }}
+                style={{
+                  color: ORANGE,
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
               >
                 // about
               </span>
@@ -650,31 +942,37 @@ export default function App() {
             <h2
               className="font-black mb-7 leading-none"
               style={{
-                fontFamily: 'Barlow Condensed, sans-serif',
-                fontSize: 'clamp(2.4rem, 5vw, 4rem)',
-                letterSpacing: '-0.01em',
-                color: '#fff7ec',
+                fontFamily: "Barlow Condensed, sans-serif",
+                fontSize: "clamp(2.4rem, 5vw, 4rem)",
+                letterSpacing: "-0.01em",
+                color: "#fff7ec",
               }}
             >
               A COMMUNITY WHERE
               <br />
               <span style={{ color: ORANGE }}>YOU GROW.</span>
             </h2>
-            <p style={{ color: '#a89280' }} className="leading-relaxed mb-5">
-              COMET is a student-driven technical club of the Computer Department, built by students who love technology, learning, and creating things that matter.
+            <p style={{ color: "#a89280" }} className="leading-relaxed mb-5">
+              COMET is a student-driven technical club of the Computer
+              Department, built by students who love technology, learning, and
+              creating things that matter.
             </p>
-            <p style={{ color: '#a89280' }} className="leading-relaxed mb-5">
-              We believe technology is best learned by doing. Through hackathons, coding competitions, workshops, and projects, we create opportunities for students to turn classroom theory into practical experience.
+            <p style={{ color: "#a89280" }} className="leading-relaxed mb-5">
+              We believe technology is best learned by doing. Through
+              hackathons, coding competitions, workshops, and projects, we
+              create opportunities for students to turn classroom theory into
+              practical experience.
             </p>
-            <p style={{ color: '#a89280' }} className="leading-relaxed">
-              Whether you're just starting your technical journey or already building and experimenting — there's a place for you in COMET.
+            <p style={{ color: "#a89280" }} className="leading-relaxed">
+              Whether you're just starting your technical journey or already
+              building and experimenting — there's a place for you in COMET.
             </p>
           </div>
 
           <div className="about-image-wrap relative">
             <div
               className="rounded-2xl overflow-hidden relative aspect-[4/3]"
-              style={{ border: '1px solid #5f4c66', background: '#231831' }}
+              style={{ border: "1px solid #5f4c66", background: "#231831" }}
             >
               <img
                 src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&auto=format"
@@ -684,14 +982,21 @@ export default function App() {
               />
               <div
                 className="absolute inset-0"
-                style={{ background: 'linear-gradient(135deg, rgba(255,129,0,0.13) 0%, rgba(23,19,38,0.65) 100%)' }}
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(255,129,0,0.13) 0%, rgba(23,19,38,0.65) 100%)",
+                }}
               />
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <blockquote
                   className="font-black text-xl leading-tight"
-                  style={{ fontFamily: 'Barlow Condensed, sans-serif', color: '#fff7ec' }}
+                  style={{
+                    fontFamily: "Barlow Condensed, sans-serif",
+                    color: "#fff7ec",
+                  }}
                 >
-                  "Explore new technologies. Work with like-minded people. Build real-world projects."
+                  "Explore new technologies. Work with like-minded people. Build
+                  real-world projects."
                 </blockquote>
               </div>
             </div>
@@ -706,14 +1011,17 @@ export default function App() {
       <section
         id="activities"
         className="py-28"
-        style={{ background: '#1a1430', position: 'relative', zIndex: 2 }}
+        style={{ background: "#1a1430", position: "relative", zIndex: 2 }}
       >
         <div className="max-w-6xl mx-auto px-5">
           <div className="mb-14">
             <div className="flex items-center gap-2 mb-5">
               <span
                 className="text-xs font-medium uppercase tracking-widest"
-                style={{ color: ORANGE, fontFamily: 'JetBrains Mono, monospace' }}
+                style={{
+                  color: ORANGE,
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
               >
                 // what we do
               </span>
@@ -721,10 +1029,10 @@ export default function App() {
             <h2
               className="font-black leading-none"
               style={{
-                fontFamily: 'Barlow Condensed, sans-serif',
-                fontSize: 'clamp(2.4rem, 6vw, 5rem)',
-                letterSpacing: '-0.02em',
-                color: '#fff7ec',
+                fontFamily: "Barlow Condensed, sans-serif",
+                fontSize: "clamp(2.4rem, 6vw, 5rem)",
+                letterSpacing: "-0.02em",
+                color: "#fff7ec",
               }}
             >
               6 WAYS TO LEVEL
@@ -735,24 +1043,54 @@ export default function App() {
 
           {/* ── Mobile: 2-col grid ── */}
           {isMobile ? (
-            <div className="activity-card grid grid-cols-2 gap-px" style={{ background: '#5f4c66' }}>
+            <div
+              className="activity-card grid grid-cols-2 gap-px"
+              style={{ background: "#5f4c66" }}
+            >
               {ACTIVITIES.map((act, i) => (
-                <div key={act.label} className="p-6" style={{ background: '#1a1430' }}>
+                <div
+                  key={act.label}
+                  className="p-6"
+                  style={{ background: "#1a1430" }}
+                >
                   <div className="flex items-center justify-between mb-4">
                     <span
                       className="px-2 py-0.5 rounded text-xs font-bold tracking-widest"
-                      style={{ fontFamily: 'JetBrains Mono, monospace', color: ORANGE, border: `1px solid ${ORANGE}28`, background: `${ORANGE}0d` }}
+                      style={{
+                        fontFamily: "JetBrains Mono, monospace",
+                        color: ORANGE,
+                        border: `1px solid ${ORANGE}28`,
+                        background: `${ORANGE}0d`,
+                      }}
                     >
                       {act.tag}
                     </span>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem', color: '#4a3865' }}>
-                      {String(i + 1).padStart(2, '0')}
+                    <span
+                      style={{
+                        fontFamily: "JetBrains Mono, monospace",
+                        fontSize: "0.62rem",
+                        color: "#4a3865",
+                      }}
+                    >
+                      {String(i + 1).padStart(2, "0")}
                     </span>
                   </div>
-                  <h3 className="font-black mb-2" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.1rem', color: '#fff7ec' }}>
+                  <h3
+                    className="font-black mb-2"
+                    style={{
+                      fontFamily: "Barlow Condensed, sans-serif",
+                      fontSize: "1.1rem",
+                      color: "#fff7ec",
+                    }}
+                  >
                     {act.label}
                   </h3>
-                  <p className="text-xs leading-relaxed" style={{ color: '#9a8878' }}>{act.desc}</p>
+                  <p
+                    className="text-xs leading-relaxed"
+                    style={{ color: "#9a8878" }}
+                  >
+                    {act.desc}
+                  </p>
                 </div>
               ))}
             </div>
@@ -760,7 +1098,7 @@ export default function App() {
             /* ── Desktop: horizontal expand-on-hover ── */
             <div
               className="activity-card flex overflow-hidden"
-              style={{ height: 400, border: '1px solid #3d2e52' }}
+              style={{ height: 400, border: "1px solid #3d2e52" }}
               onMouseLeave={() => setActiveActivity(-1)}
             >
               {ACTIVITIES.map((act, i) => {
@@ -772,10 +1110,13 @@ export default function App() {
                     style={{
                       flex: isActive ? 5 : 1,
                       minWidth: 0,
-                      borderRight: i < 5 ? '1px solid #3d2e52' : 'none',
-                      borderLeft: `2px solid ${isActive ? ORANGE : 'transparent'}`,
-                      background: isActive ? '#231831' : '#171326',
-                      transition: 'flex 0.5s cubic-bezier(0.4,0,0.2,1), background 0.4s, border-color 0.4s',
+                      borderRight: i < 5 ? "1px solid #3d2e52" : "none",
+                      borderLeft: `2px solid ${
+                        isActive ? ORANGE : "transparent"
+                      }`,
+                      background: isActive ? "#231831" : "#171326",
+                      transition:
+                        "flex 0.5s cubic-bezier(0.4,0,0.2,1), background 0.4s, border-color 0.4s",
                     }}
                     onMouseEnter={() => setActiveActivity(i)}
                   >
@@ -784,34 +1125,34 @@ export default function App() {
                       className="absolute inset-0 flex flex-col items-center justify-between py-7 px-3"
                       style={{
                         opacity: isActive ? 0 : 1,
-                        transition: 'opacity 0.18s',
-                        pointerEvents: 'none',
+                        transition: "opacity 0.18s",
+                        pointerEvents: "none",
                       }}
                     >
                       <span
                         style={{
-                          fontFamily: 'JetBrains Mono, monospace',
-                          fontSize: '0.6rem',
-                          color: '#4a3865',
-                          letterSpacing: '0.08em',
+                          fontFamily: "JetBrains Mono, monospace",
+                          fontSize: "0.6rem",
+                          color: "#4a3865",
+                          letterSpacing: "0.08em",
                         }}
                       >
-                        {String(i + 1).padStart(2, '0')}
+                        {String(i + 1).padStart(2, "0")}
                       </span>
 
                       <span
                         style={{
-                          writingMode: 'vertical-rl',
-                          transform: 'rotate(180deg)',
-                          fontFamily: 'Barlow Condensed, sans-serif',
+                          writingMode: "vertical-rl",
+                          transform: "rotate(180deg)",
+                          fontFamily: "Barlow Condensed, sans-serif",
                           fontWeight: 900,
-                          fontSize: '1rem',
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                          whiteSpace: 'nowrap',
+                          fontSize: "1rem",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          whiteSpace: "nowrap",
                           color: ORANGE,
                           background: `${ORANGE}14`,
-                          padding: '4px 6px',
+                          padding: "4px 6px",
                           borderRadius: 2,
                         }}
                       >
@@ -822,9 +1163,9 @@ export default function App() {
                         style={{
                           width: 4,
                           height: 4,
-                          borderRadius: '50%',
-                          background: '#3d2e52',
-                          display: 'block',
+                          borderRadius: "50%",
+                          background: "#3d2e52",
+                          display: "block",
                         }}
                       />
                     </div>
@@ -834,9 +1175,11 @@ export default function App() {
                       className="absolute inset-0 p-8 flex flex-col justify-between"
                       style={{
                         opacity: isActive ? 1 : 0,
-                        transform: isActive ? 'translateX(0)' : 'translateX(-12px)',
-                        transition: 'opacity 0.3s 0.15s, transform 0.3s 0.15s',
-                        pointerEvents: isActive ? 'auto' : 'none',
+                        transform: isActive
+                          ? "translateX(0)"
+                          : "translateX(-12px)",
+                        transition: "opacity 0.3s 0.15s, transform 0.3s 0.15s",
+                        pointerEvents: isActive ? "auto" : "none",
                       }}
                     >
                       <div>
@@ -844,10 +1187,10 @@ export default function App() {
                           <span
                             className="px-2 py-1 rounded"
                             style={{
-                              fontFamily: 'JetBrains Mono, monospace',
+                              fontFamily: "JetBrains Mono, monospace",
                               fontWeight: 700,
-                              fontSize: '0.7rem',
-                              letterSpacing: '0.12em',
+                              fontSize: "0.7rem",
+                              letterSpacing: "0.12em",
                               color: ORANGE,
                               border: `1px solid ${ORANGE}30`,
                               background: `${ORANGE}0d`,
@@ -857,35 +1200,37 @@ export default function App() {
                           </span>
                           <span
                             style={{
-                              fontFamily: 'JetBrains Mono, monospace',
-                              fontSize: '0.68rem',
-                              color: '#5f4c66',
-                              letterSpacing: '0.06em',
+                              fontFamily: "JetBrains Mono, monospace",
+                              fontSize: "0.68rem",
+                              color: "#5f4c66",
+                              letterSpacing: "0.06em",
                             }}
                           >
-                            {String(i + 1).padStart(2, '0')} / 06
+                            {String(i + 1).padStart(2, "0")} / 06
                           </span>
                         </div>
                         <h3
                           className="font-black mb-4 leading-none"
                           style={{
-                            fontFamily: 'Barlow Condensed, sans-serif',
-                            fontSize: 'clamp(1.4rem, 2vw, 2rem)',
-                            letterSpacing: '-0.01em',
-                            color: '#fff7ec',
-                            whiteSpace: 'nowrap',
+                            fontFamily: "Barlow Condensed, sans-serif",
+                            fontSize: "clamp(1.4rem, 2vw, 2rem)",
+                            letterSpacing: "-0.01em",
+                            color: "#fff7ec",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {act.label.toUpperCase()}
                         </h3>
                         <p
                           className="text-sm leading-relaxed"
-                          style={{ color: '#9a8878', maxWidth: '30ch' }}
+                          style={{ color: "#9a8878", maxWidth: "30ch" }}
                         >
                           {act.desc}
                         </p>
                       </div>
-                      <div style={{ width: 40, height: 1, background: ORANGE }} />
+                      <div
+                        style={{ width: 40, height: 1, background: ORANGE }}
+                      />
                     </div>
                   </div>
                 )
@@ -900,7 +1245,8 @@ export default function App() {
         id="shipaton"
         className="py-28 relative overflow-hidden"
         style={{
-          background: 'radial-gradient(ellipse 70% 55% at 30% 50%, rgba(255,129,0,0.07) 0%, transparent 70%), #171326',
+          background:
+            "radial-gradient(ellipse 70% 55% at 30% 50%, rgba(255,129,0,0.07) 0%, transparent 70%), #171326",
           zIndex: 2,
         }}
       >
@@ -908,7 +1254,7 @@ export default function App() {
           <div className="flex items-center gap-2 mb-5">
             <span
               className="text-xs font-medium uppercase tracking-widest"
-              style={{ color: ORANGE, fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ color: ORANGE, fontFamily: "JetBrains Mono, monospace" }}
             >
               // featured event
             </span>
@@ -923,52 +1269,80 @@ export default function App() {
                   border: `1px solid ${ORANGE}28`,
                   color: ORANGE,
                   background: `${ORANGE}0d`,
-                  fontFamily: 'JetBrains Mono, monospace',
+                  fontFamily: "JetBrains Mono, monospace",
                 }}
               >
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ORANGE }} />
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-pulse"
+                  style={{ background: ORANGE }}
+                />
                 Open for Registration
               </div>
 
               <h2
-                className="font-black leading-none mb-6"
+                className="font-black leading-none mb-3"
                 style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontSize: 'clamp(3rem, 7vw, 6.5rem)',
-                  letterSpacing: '-0.02em',
-                  color: '#fff7ec',
+                  fontFamily: "Barlow Condensed, sans-serif",
+                  fontSize: "clamp(3rem, 7vw, 6.5rem)",
+                  letterSpacing: "-0.02em",
+                  color: "#fff7ec",
                 }}
               >
-                SHIPATON
+                ZENESYS
                 <br />
                 <span style={{ color: ORANGE }}>2026</span>
               </h2>
 
-              <p className="leading-relaxed mb-9 text-lg max-w-lg" style={{ color: '#a89280' }}>
-                The world's biggest mobile hackathon for people who actually ship. Launch real apps to real stores, compete for big prizes, and show the world what you built.
+              <p
+                className="text-xs uppercase tracking-widest mb-5"
+                style={{
+                  fontFamily: "JetBrains Mono, monospace",
+                  color: "#5f4c66",
+                }}
+              >
+                ERP Olympics Internal Hackathon
+              </p>
+
+              <p
+                className="leading-relaxed mb-9 text-lg max-w-lg"
+                style={{ color: "#a89280" }}
+              >
+                The official internal hackathon of GHRCEM Pune, organized by
+                Comet Club in collaboration with Suite Pedia. A 12-hour
+                intensive build sprint — the exclusive qualifying round for the
+                ERP Olympics 2026 global stage.
               </p>
 
               <div className="grid grid-cols-2 gap-3 mb-10 max-w-sm">
                 {[
-                  { label: 'Prize Pool', value: '$70k+' },
-                  { label: 'Categories', value: '21' },
-                  { label: 'Grand Prize', value: 'Cash + Billboard' },
-                  { label: 'Eligible', value: 'All Students' },
+                  { label: "Date", value: "22 Aug 2026" },
+                  { label: "Duration", value: "12 Hours" },
+                  { label: "Team Size", value: "2–4 Members" },
+                  { label: "Domains", value: "ERP / AI / NetSuite" },
                 ].map((item) => (
                   <div
                     key={item.label}
                     className="p-4 rounded-lg"
-                    style={{ background: '#231831', border: '1px solid #5f4c66' }}
+                    style={{
+                      background: "#231831",
+                      border: "1px solid #5f4c66",
+                    }}
                   >
                     <div
                       className="text-xs mb-1 uppercase tracking-wider"
-                      style={{ color: '#8a7868', fontFamily: 'JetBrains Mono, monospace' }}
+                      style={{
+                        color: "#8a7868",
+                        fontFamily: "JetBrains Mono, monospace",
+                      }}
                     >
                       {item.label}
                     </div>
                     <div
                       className="font-bold text-base"
-                      style={{ fontFamily: 'Barlow Condensed, sans-serif', color: '#fff7ec' }}
+                      style={{
+                        fontFamily: "Barlow Condensed, sans-serif",
+                        color: "#fff7ec",
+                      }}
                     >
                       {item.value}
                     </div>
@@ -978,20 +1352,32 @@ export default function App() {
 
               <div className="flex flex-wrap gap-4">
                 <a
-                  href="#join"
+                  href="https://luma.com/y21u4rur"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-7 py-3.5 font-semibold rounded text-sm transition-all hover:brightness-110 active:scale-95"
-                  style={{ background: ORANGE, color: '#171326' }}
+                  style={{ background: ORANGE, color: "#171326" }}
                 >
-                  Register for Shipaton →
+                  Register for Zenesys →
                 </a>
                 <a
-                  href="#"
+                  href="https://chat.whatsapp.com/CtwlNJgSy4dEtayApQ25dS?s=cl&p=a&ilr=1"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="px-7 py-3.5 font-semibold rounded text-sm transition-colors"
-                  style={{ border: '1px solid #5f4c66', color: '#a89280', background: 'transparent' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
+                  style={{
+                    border: "1px solid #5f4c66",
+                    color: "#a89280",
+                    background: "transparent",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "#fff7ec")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "#a89280")
+                  }
                 >
-                  Read the FAQ
+                  WhatsApp Community
                 </a>
               </div>
             </div>
@@ -1002,7 +1388,7 @@ export default function App() {
                 <div
                   key={cat.title}
                   className="flex items-start gap-4 p-5 rounded-xl transition-all duration-200 group"
-                  style={{ background: '#1e1530', border: '1px solid #3d2e52' }}
+                  style={{ background: "#1e1530", border: "1px solid #3d2e52" }}
                 >
                   <div className="mt-0.5 shrink-0">
                     <CrosshairSVG size={15} />
@@ -1011,7 +1397,10 @@ export default function App() {
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <span
                         className="font-bold text-[0.95rem]"
-                        style={{ fontFamily: 'Barlow Condensed, sans-serif', color: '#fff7ec' }}
+                        style={{
+                          fontFamily: "Barlow Condensed, sans-serif",
+                          color: "#fff7ec",
+                        }}
                       >
                         {cat.title}
                       </span>
@@ -1020,13 +1409,16 @@ export default function App() {
                         style={{
                           background: `${ORANGE}12`,
                           color: ORANGE,
-                          fontFamily: 'JetBrains Mono, monospace',
+                          fontFamily: "JetBrains Mono, monospace",
                         }}
                       >
                         {cat.tag}
                       </span>
                     </div>
-                    <p className="text-xs leading-relaxed transition-colors" style={{ color: '#9a8878' }}>
+                    <p
+                      className="text-xs leading-relaxed transition-colors"
+                      style={{ color: "#9a8878" }}
+                    >
                       {cat.desc}
                     </p>
                   </div>
@@ -1041,7 +1433,11 @@ export default function App() {
       <section
         id="join"
         className="py-32 relative overflow-hidden"
-        style={{ background: '#1e1530', borderTop: '1px solid #3d2e52', zIndex: 2 }}
+        style={{
+          background: "#1e1530",
+          borderTop: "1px solid #3d2e52",
+          zIndex: 2,
+        }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
@@ -1054,7 +1450,7 @@ export default function App() {
             <CrosshairSVG size={18} />
             <span
               className="text-xs font-medium uppercase tracking-widest"
-              style={{ color: ORANGE, fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ color: ORANGE, fontFamily: "JetBrains Mono, monospace" }}
             >
               // join the crew
             </span>
@@ -1064,10 +1460,10 @@ export default function App() {
           <h2
             className="font-black leading-none mb-7"
             style={{
-              fontFamily: 'Barlow Condensed, sans-serif',
-              fontSize: 'clamp(3rem, 8vw, 7rem)',
-              letterSpacing: '-0.02em',
-              color: '#fff7ec',
+              fontFamily: "Barlow Condensed, sans-serif",
+              fontSize: "clamp(3rem, 8vw, 7rem)",
+              letterSpacing: "-0.02em",
+              color: "#fff7ec",
             }}
           >
             READY TO
@@ -1075,24 +1471,33 @@ export default function App() {
             <span style={{ color: ORANGE }}>LAUNCH?</span>
           </h2>
 
-          <p className="text-lg leading-relaxed mb-11 max-w-lg mx-auto" style={{ color: '#a89280' }}>
-            Be part of a community that learns by doing. Whether you're a first-semester student or a final-year builder — there's a place for you.
+          <p
+            className="text-lg leading-relaxed mb-11 max-w-lg mx-auto"
+            style={{ color: "#a89280" }}
+          >
+            Be part of a community that learns by doing. Whether you're a
+            first-semester student or a final-year builder — there's a place for
+            you.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="mailto:comet@example.com"
               className="px-9 py-4 font-semibold rounded text-sm transition-all hover:brightness-110 active:scale-95"
-              style={{ background: ORANGE, color: '#171326' }}
+              style={{ background: ORANGE, color: "#171326" }}
             >
               Apply to Join →
             </a>
             <a
               href="#activities"
               className="px-9 py-4 font-semibold rounded text-sm transition-colors"
-              style={{ border: '1px solid #5f4c66', color: '#a89280', background: 'transparent' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
+              style={{
+                border: "1px solid #5f4c66",
+                color: "#a89280",
+                background: "transparent",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#fff7ec")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#a89280")}
             >
               See What We Do
             </a>
@@ -1103,9 +1508,9 @@ export default function App() {
       {/* ── FOOTER ────────────────────────────────────────────────────────────── */}
       <footer
         style={{
-          background: '#120e20',
-          borderTop: '1px solid #3d2e52',
-          position: 'relative',
+          background: "#120e20",
+          borderTop: "1px solid #3d2e52",
+          position: "relative",
           zIndex: 2,
         }}
       >
@@ -1113,18 +1518,30 @@ export default function App() {
           <div className="grid md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-2">
               <img src={cometLogo} alt="COMET" className="h-8 w-auto mb-5" />
-              <p className="text-sm leading-relaxed max-w-sm" style={{ color: '#7a6a60' }}>
-                Student-driven technical club of the Computer Department. Built by students who love technology, learning, and creating things that matter.
+              <p
+                className="text-sm leading-relaxed max-w-sm"
+                style={{ color: "#7a6a60" }}
+              >
+                Student-driven technical club of the Computer Department. Built
+                by students who love technology, learning, and creating things
+                that matter.
               </p>
               <div className="flex gap-5 mt-6">
-                {['GitHub', 'Instagram', 'LinkedIn'].map((s) => (
+                {["GitHub", "Instagram", "LinkedIn"].map((s) => (
                   <a
                     key={s}
                     href="#"
                     className="text-xs transition-colors"
-                    style={{ color: '#6a5a50', fontFamily: 'JetBrains Mono, monospace' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#a89280')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#6a5a50')}
+                    style={{
+                      color: "#6a5a50",
+                      fontFamily: "JetBrains Mono, monospace",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "#a89280")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "#6a5a50")
+                    }
                   >
                     {s}
                   </a>
@@ -1135,43 +1552,59 @@ export default function App() {
             <div>
               <h4
                 className="text-xs uppercase tracking-widest mb-5"
-                style={{ color: '#8a7868', fontFamily: 'JetBrains Mono, monospace' }}
+                style={{
+                  color: "#8a7868",
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
               >
                 Club
               </h4>
               <ul className="flex flex-col gap-3">
-                {['About', 'Activities', 'Events', 'Shipaton 2026', 'Join'].map((l) => (
-                  <li key={l}>
-                    <a
-                      href="#"
-                      className="text-sm transition-colors"
-                      style={{ color: '#7a6a60' }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#a89280')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#7a6a60')}
-                    >
-                      {l}
-                    </a>
-                  </li>
-                ))}
+                {["About", "Activities", "Events", "Shipaton 2026", "Join"].map(
+                  (l) => (
+                    <li key={l}>
+                      <a
+                        href="#"
+                        className="text-sm transition-colors"
+                        style={{ color: "#7a6a60" }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.color = "#a89280")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color = "#7a6a60")
+                        }
+                      >
+                        {l}
+                      </a>
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
 
             <div>
               <h4
                 className="text-xs uppercase tracking-widest mb-5"
-                style={{ color: '#8a7868', fontFamily: 'JetBrains Mono, monospace' }}
+                style={{
+                  color: "#8a7868",
+                  fontFamily: "JetBrains Mono, monospace",
+                }}
               >
                 Contact
               </h4>
               <ul className="flex flex-col gap-3">
-                {['Email Us', 'Instagram DM', 'Campus Office'].map((l) => (
+                {["Email Us", "Instagram DM", "Campus Office"].map((l) => (
                   <li key={l}>
                     <a
                       href="#"
                       className="text-sm transition-colors"
-                      style={{ color: '#7a6a60' }}
-                      onMouseEnter={e => (e.currentTarget.style.color = '#a89280')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#7a6a60')}
+                      style={{ color: "#7a6a60" }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.color = "#a89280")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.color = "#7a6a60")
+                      }
                     >
                       {l}
                     </a>
@@ -1181,10 +1614,16 @@ export default function App() {
             </div>
           </div>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid #2d1e3d' }}>
+          <div
+            className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4"
+            style={{ borderTop: "1px solid #2d1e3d" }}
+          >
             <p
               className="text-xs"
-              style={{ color: '#5a4e55', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{
+                color: "#5a4e55",
+                fontFamily: "JetBrains Mono, monospace",
+              }}
             >
               © 2026 COMET — Computer Department Technical Club.
             </p>
@@ -1193,9 +1632,9 @@ export default function App() {
               <span
                 className="text-xs font-black"
                 style={{
-                  fontFamily: 'Barlow Condensed, sans-serif',
+                  fontFamily: "Barlow Condensed, sans-serif",
                   color: ORANGE,
-                  letterSpacing: '0.1em',
+                  letterSpacing: "0.1em",
                 }}
               >
                 LEARN. BUILD. COMPETE. INNOVATE.
@@ -1204,7 +1643,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
     </div>
   )
 }
