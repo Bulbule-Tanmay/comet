@@ -3,21 +3,37 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import 'tailwindcss';
 
+:root {
+  --space: #171326;
+  --background: #171326;
+  --foreground: #fff7ec;
+  --muted: #ddcbbc;
+  --subtle: #2d1e3d;
+  --surface: #231831;
+  --line: #5f4c66;
+  --accent: #ff8100;
+  --accent-foreground: #171326;
+  --paper: #fff7ec;
+  --paper-foreground: #2d1e3d;
+  --gold: #ffba55;
+  --pink: #f36f98;
+  --blue: #7ca8c4;
+}
+
 @theme {
   --font-display: 'Barlow Condensed', sans-serif;
   --font-sans: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --color-orange: #e8390e;
-  --color-orange-dim: #b82c0a;
-  --color-surface: #111111;
-  --color-card: #161616;
-  --color-border: #1f1f1f;
-  --color-muted: #6b6b6b;
+  --color-orange: #ff8100;
+  --color-surface: #231831;
+  --color-card: #1e1530;
+  --color-border: #5f4c66;
+  --color-muted: #a89280;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #1f1f1f transparent;
+  scrollbar-color: #5f4c66 transparent;
 }
 
 *::-webkit-scrollbar {
@@ -29,7 +45,7 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #1f1f1f;
+  background: #5f4c66;
   border-radius: 2px;
 }
 
@@ -38,7 +54,7 @@ html {
 }
 
 body {
-  background: #0a0a0a;
-  color: #ffffff;
+  background: #171326;
+  color: #fff7ec;
   font-family: 'Inter', sans-serif;
 }

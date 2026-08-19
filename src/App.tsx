@@ -6,8 +6,8 @@ import cometLogo from '@/imports/comet_logo.png'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const ORANGE = '#e8390e'
-const ORANGE_N = 0xe8390e
+const ORANGE = '#ff8100'
+const ORANGE_N = 0xff8100
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
@@ -53,12 +53,12 @@ function makeCrosshair3D(size: number, opacity = 0.55): THREE.Group {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const ACTIVITIES = [
-  { icon: '⚡', label: 'Hackathons', desc: 'Build fast, ship real. Multi-day intense events where teams create working products from scratch under pressure.' },
-  { icon: '🏆', label: 'Coding Competitions', desc: 'Algorithm challenges, competitive programming, and inter-college battles to sharpen your edge.' },
-  { icon: '🛠', label: 'Workshops', desc: 'Hands-on sessions by peers and professionals — tools, frameworks, and emerging tech, practically taught.' },
-  { icon: '🚀', label: 'Real-World Projects', desc: 'Ship products that actually matter. Build software used by real people, not just your professor.' },
-  { icon: '🧩', label: 'Technical Challenges', desc: 'Weekly and monthly challenges that keep your skills sharp and your portfolio growing continuously.' },
-  { icon: '🏢', label: 'Industry Activities', desc: 'Connect with companies, attend engineer talks, and build relationships that open real career doors.' },
+  { tag: 'HACK', label: 'Hackathons', desc: 'Build fast, ship real. Multi-day intense events where teams create working products from scratch under pressure.' },
+  { tag: 'CODE', label: 'Coding Competitions', desc: 'Algorithm challenges, competitive programming, and inter-college battles to sharpen your edge.' },
+  { tag: 'WORK', label: 'Workshops', desc: 'Hands-on sessions by peers and professionals — tools, frameworks, and emerging tech, practically taught.' },
+  { tag: 'SHIP', label: 'Real-World Projects', desc: 'Ship products that actually matter. Build software used by real people, not just your professor.' },
+  { tag: 'CHAL', label: 'Technical Challenges', desc: 'Weekly and monthly challenges that keep your skills sharp and your portfolio growing continuously.' },
+  { tag: 'INDX', label: 'Industry Activities', desc: 'Connect with companies, attend engineer talks, and build relationships that open real career doors.' },
 ]
 
 const STATS = [
@@ -91,7 +91,7 @@ function ScrambleLetter({
   duration?: number
   targetColor: string
 }) {
-  const [display, setDisplay] = useState(' ')
+  const [display, setDisplay] = useState(' ')
   const [locked, setLocked] = useState(false)
 
   useEffect(() => {
@@ -190,6 +190,7 @@ export default function App() {
   const heroRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [navSolid, setNavSolid] = useState(false)
+  const [activeActivity, setActiveActivity] = useState(0)
   const isMobile = window.innerWidth < 768
 
   // Nav transparency: stays invisible over the 3D hero, solidifies over content
@@ -226,22 +227,19 @@ export default function App() {
     }
     const pGeo = new THREE.BufferGeometry()
     pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3))
-    const pMat = new THREE.PointsMaterial({ size: 0.04, color: 0xffffff, transparent: true, opacity: 0.4, sizeAttenuation: true })
+    const pMat = new THREE.PointsMaterial({ size: 0.04, color: 0xfff7ec, transparent: true, opacity: 0.35, sizeAttenuation: true })
     const particles = new THREE.Points(pGeo, pMat)
     scene.add(particles)
 
     // ── Rings ──────────────────────────────────────────────────────────────
-    // Camera starts at z=10 and flies to z=-2.
-    // ring1 sits at z=5 → camera flies THROUGH it at scroll progress ≈ 0.42
-    // ring2 sits at z=-1 → camera approaches but doesn't reach it
-    const ring1 = makeRing(3.5, 120, 0xffffff, 0.07)
+    const ring1 = makeRing(3.5, 120, 0xfff7ec, 0.07)
     ring1.position.z = 5
 
     const ring2 = makeRing(5.5, 120, ORANGE_N, 0.12)
     ring2.rotation.x = Math.PI * 0.28
     ring2.position.z = -1
 
-    const ring3 = makeRing(9.5, 120, 0x1a1a1a, 0.7)
+    const ring3 = makeRing(9.5, 120, 0x2d1e3d, 0.7)
     ring3.rotation.x = Math.PI / 2
     ring3.position.z = -10
 
@@ -277,7 +275,6 @@ export default function App() {
     gsap.set('.hero-cta-group', { opacity: 0, y: 12 })
     gsap.set('.hero-hint', { opacity: 0 })
 
-    // INNOVATE. ends at ~950 + 8*52 + 300 = ~1666ms → tagline at ~1.8s
     const entranceTl = gsap.timeline({ delay: 0.15 })
     entranceTl
       .to('.hero-label', { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' })
@@ -297,15 +294,12 @@ export default function App() {
       },
     })
 
-    gsap.set('.activity-card', { opacity: 0, y: 50, clipPath: 'inset(100% 0 0 0)' })
+    gsap.set('.activity-card', { opacity: 0, y: 30 })
     ScrollTrigger.create({
       trigger: '#activities',
       start: 'top 66%',
       onEnter: () =>
-        gsap.to('.activity-card', {
-          opacity: 1, y: 0, clipPath: 'inset(0% 0 0 0)',
-          duration: 0.75, stagger: 0.09, ease: 'power3.out',
-        }),
+        gsap.to('.activity-card', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }),
     })
 
     gsap.set('.shipaton-left', { opacity: 0, x: -55 })
@@ -339,13 +333,11 @@ export default function App() {
       currentP = lerp(currentP, targetP, 0.05)
       const p = currentP
 
-      // Camera: z=10 → z=-2. Passes through ring1.z=5 at p≈0.42
       camera.position.z = lerp(10, -2, p)
       camera.position.x = Math.sin(elapsed * 0.22) * 0.2 * (1 - p * 0.75)
       camera.position.y = Math.cos(elapsed * 0.17) * 0.13 * (1 - p * 0.75)
       camera.rotation.z = Math.sin(elapsed * 0.14) * 0.012
 
-      // ring1 opacity: builds up, peaks at p≈0.35, fades as camera flies through
       const r1Op = p < 0.38
         ? lerp(0, 0.22, p / 0.38)
         : Math.max(0, 0.22 - (p - 0.38) * 0.55)
@@ -353,22 +345,18 @@ export default function App() {
       ring1.rotation.z = elapsed * 0.042 + p * 0.9
       ring1.scale.setScalar(1 + p * 0.08)
 
-      // ring2 brightens as we approach it
       ;(ring2.material as THREE.LineBasicMaterial).opacity = Math.min(0.8, p * 1.05)
       ring2.rotation.y = elapsed * 0.026 + p * 0.5
       ring2.rotation.x = Math.PI * 0.28 + Math.sin(elapsed * 0.15) * 0.05 + p * 0.2
 
-      // ring3: barely moves, gives distant sense of scale
       ring3.rotation.z = elapsed * 0.012
 
-      // Crosshairs: idle rotation at different speeds
       crosshairs.forEach(({ mesh, speed }, i) => {
         mesh.rotation.z += 0.0022 * speed * (i % 2 === 0 ? 1 : -1)
         mesh.rotation.y += 0.0014 * speed
         mesh.rotation.x += 0.0009 * speed * (i % 3 === 0 ? 1 : -0.5)
       })
 
-      // Particles: very slow drift
       particles.rotation.y = elapsed * 0.008 + p * 0.055
       particles.rotation.x = p * 0.022
 
@@ -399,7 +387,7 @@ export default function App() {
   // ── JSX ───────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-[#0a0a0a] text-white overflow-x-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="overflow-x-hidden" style={{ background: '#171326', color: '#fff7ec', fontFamily: 'Inter, sans-serif' }}>
 
       {/* Three.js canvas — fixed background, behind everything */}
       {!isMobile && (
@@ -414,9 +402,9 @@ export default function App() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
         style={{
-          background: navSolid ? 'rgba(10,10,10,0.96)' : 'rgba(10,10,10,0.92)',
+          background: navSolid ? 'rgba(23,19,38,0.97)' : 'rgba(23,19,38,0.85)',
           backdropFilter: navSolid ? 'blur(14px)' : 'none',
-          borderBottom: navSolid ? '1px solid #1a1a1a' : '1px solid transparent',
+          borderBottom: navSolid ? '1px solid #3d2e52' : '1px solid transparent',
         }}
       >
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
@@ -429,7 +417,10 @@ export default function App() {
               <a
                 key={label}
                 href={href}
-                className="text-sm text-[#888] hover:text-white transition-colors duration-200"
+                className="text-sm transition-colors duration-200"
+                style={{ color: '#a89280' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
               >
                 {label}
               </a>
@@ -438,8 +429,8 @@ export default function App() {
 
           <a
             href="#join"
-            className="hidden md:block px-5 py-2 text-sm font-semibold rounded text-white transition-all hover:brightness-110 active:scale-95"
-            style={{ background: ORANGE }}
+            className="hidden md:block px-5 py-2 text-sm font-semibold rounded transition-all hover:brightness-110 active:scale-95"
+            style={{ background: ORANGE, color: '#171326' }}
           >
             Join COMET
           </a>
@@ -450,20 +441,21 @@ export default function App() {
             aria-label="Toggle menu"
           >
             <div className="w-5 flex flex-col gap-1">
-              <span className={`block h-0.5 bg-white/60 transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-              <span className={`block h-0.5 bg-white/60 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-              <span className={`block h-0.5 bg-white/60 transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+              <span className={`block h-0.5 transition-all duration-200 ${menuOpen ? 'rotate-45 translate-y-1.5' : ''}`} style={{ background: '#ddcbbc' }} />
+              <span className={`block h-0.5 transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} style={{ background: '#ddcbbc' }} />
+              <span className={`block h-0.5 transition-all duration-200 ${menuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} style={{ background: '#ddcbbc' }} />
             </div>
           </button>
         </div>
 
         {menuOpen && (
-          <div className="md:hidden px-5 py-4 flex flex-col gap-4 bg-[#0a0a0a] border-t border-[#1a1a1a]">
+          <div className="md:hidden px-5 py-4 flex flex-col gap-4" style={{ background: '#171326', borderTop: '1px solid #3d2e52' }}>
             {([['About', '#about'], ['Activities', '#activities'], ['Events', '#shipaton'], ['Join', '#join']] as const).map(([label, href]) => (
               <a
                 key={label}
                 href={href}
-                className="text-sm text-[#888]"
+                className="text-sm"
+                style={{ color: '#a89280' }}
                 onClick={() => setMenuOpen(false)}
               >
                 {label}
@@ -471,8 +463,8 @@ export default function App() {
             ))}
             <a
               href="#join"
-              className="px-5 py-2 text-sm font-semibold rounded text-white text-center"
-              style={{ background: ORANGE }}
+              className="px-5 py-2 text-sm font-semibold rounded text-center"
+              style={{ background: ORANGE, color: '#171326' }}
               onClick={() => setMenuOpen(false)}
             >
               Join COMET
@@ -505,15 +497,10 @@ export default function App() {
           {isMobile && (
             <div
               className="absolute inset-0"
-              style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(232,57,14,0.1) 0%, transparent 70%)' }}
+              style={{ background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(255,129,0,0.1) 0%, transparent 70%)' }}
             />
           )}
 
-          {/*
-            Centering zone starts strictly BELOW the nav (top: 64px).
-            This guarantees no content can ever reach into the nav band
-            regardless of viewport height or content height.
-          */}
           <div
             className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-center"
             style={{ top: 64, zIndex: 3 }}
@@ -539,7 +526,7 @@ export default function App() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                <ScrambleWord word="LEARN." startDelay={250} color="#ffffff" />
+                <ScrambleWord word="LEARN." startDelay={250} color="#fff7ec" />
               </div>
               <div
                 className="font-black block leading-none"
@@ -559,7 +546,7 @@ export default function App() {
                   letterSpacing: '-0.02em',
                 }}
               >
-                <ScrambleWord word="INNOVATE." startDelay={980} color="#ffffff" />
+                <ScrambleWord word="INNOVATE." startDelay={980} color="#fff7ec" />
               </div>
             </div>
 
@@ -571,7 +558,7 @@ export default function App() {
                   className="font-black text-xl md:text-2xl"
                   style={{
                     fontFamily: 'Barlow Condensed, sans-serif',
-                    color: i === 3 ? ORANGE : '#282828',
+                    color: i === 3 ? ORANGE : '#3d2e52',
                     letterSpacing: '0.04em',
                   }}
                 >
@@ -584,15 +571,17 @@ export default function App() {
             <div className="hero-cta-group mt-10 flex flex-col sm:flex-row gap-4">
               <a
                 href="#join"
-                className="px-8 py-3.5 text-sm font-semibold rounded text-white transition-all hover:brightness-110 active:scale-95"
-                style={{ background: ORANGE }}
+                className="px-8 py-3.5 text-sm font-semibold rounded transition-all hover:brightness-110 active:scale-95"
+                style={{ background: ORANGE, color: '#171326' }}
               >
                 Join COMET →
               </a>
               <a
                 href="#about"
-                className="px-8 py-3.5 text-sm font-semibold rounded transition-colors hover:text-white"
-                style={{ border: '1px solid #252525', color: '#666', background: 'transparent' }}
+                className="px-8 py-3.5 text-sm font-semibold rounded transition-colors"
+                style={{ border: '1px solid #5f4c66', color: '#a89280', background: 'transparent' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
               >
                 Learn More
               </a>
@@ -603,19 +592,19 @@ export default function App() {
           <div className="hero-hint absolute bottom-9 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none">
             <span
               className="text-xs uppercase tracking-widest"
-              style={{ color: '#333', fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ color: '#4a3865', fontFamily: 'JetBrains Mono, monospace' }}
             >
               scroll
             </span>
-            <div className="w-px h-9 bg-gradient-to-b from-[#2a2a2a] to-transparent" />
+            <div className="w-px h-9" style={{ background: 'linear-gradient(to bottom, #5f4c66, transparent)' }} />
           </div>
         </div>
       </div>
 
       {/* ── STATS ─────────────────────────────────────────────────────────────── */}
       <section
-        className="py-14 border-y border-[#181818]"
-        style={{ background: '#0d0d0d', position: 'relative', zIndex: 2 }}
+        className="py-14"
+        style={{ background: '#1e1530', borderTop: '1px solid #3d2e52', borderBottom: '1px solid #3d2e52', position: 'relative', zIndex: 2 }}
       >
         <div className="max-w-6xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-8">
           {STATS.map((s) => (
@@ -632,8 +621,8 @@ export default function App() {
                 {s.value}
               </div>
               <div
-                className="text-xs text-[#555] uppercase tracking-widest"
-                style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                className="text-xs uppercase tracking-widest"
+                style={{ color: '#9a8878', fontFamily: 'JetBrains Mono, monospace' }}
               >
                 {s.label}
               </div>
@@ -646,7 +635,7 @@ export default function App() {
       <section
         id="about"
         className="py-28"
-        style={{ background: '#0a0a0a', position: 'relative', zIndex: 2 }}
+        style={{ background: '#171326', position: 'relative', zIndex: 2 }}
       >
         <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-16 items-center">
           <div className="about-text-block">
@@ -664,19 +653,20 @@ export default function App() {
                 fontFamily: 'Barlow Condensed, sans-serif',
                 fontSize: 'clamp(2.4rem, 5vw, 4rem)',
                 letterSpacing: '-0.01em',
+                color: '#fff7ec',
               }}
             >
               A COMMUNITY WHERE
               <br />
               <span style={{ color: ORANGE }}>YOU GROW.</span>
             </h2>
-            <p className="text-[#888] leading-relaxed mb-5">
+            <p style={{ color: '#a89280' }} className="leading-relaxed mb-5">
               COMET is a student-driven technical club of the Computer Department, built by students who love technology, learning, and creating things that matter.
             </p>
-            <p className="text-[#888] leading-relaxed mb-5">
+            <p style={{ color: '#a89280' }} className="leading-relaxed mb-5">
               We believe technology is best learned by doing. Through hackathons, coding competitions, workshops, and projects, we create opportunities for students to turn classroom theory into practical experience.
             </p>
-            <p className="text-[#888] leading-relaxed">
+            <p style={{ color: '#a89280' }} className="leading-relaxed">
               Whether you're just starting your technical journey or already building and experimenting — there's a place for you in COMET.
             </p>
           </div>
@@ -684,22 +674,22 @@ export default function App() {
           <div className="about-image-wrap relative">
             <div
               className="rounded-2xl overflow-hidden relative aspect-[4/3]"
-              style={{ border: '1px solid #1f1f1f', background: '#0e0e0e' }}
+              style={{ border: '1px solid #5f4c66', background: '#231831' }}
             >
               <img
                 src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&auto=format"
                 alt="COMET members collaborating on laptops"
                 className="w-full h-full object-cover"
-                style={{ opacity: 0.55 }}
+                style={{ opacity: 0.5 }}
               />
               <div
                 className="absolute inset-0"
-                style={{ background: 'linear-gradient(135deg, rgba(232,57,14,0.13) 0%, rgba(10,10,10,0.62) 100%)' }}
+                style={{ background: 'linear-gradient(135deg, rgba(255,129,0,0.13) 0%, rgba(23,19,38,0.65) 100%)' }}
               />
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <blockquote
-                  className="font-black text-xl text-white leading-tight"
-                  style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
+                  className="font-black text-xl leading-tight"
+                  style={{ fontFamily: 'Barlow Condensed, sans-serif', color: '#fff7ec' }}
                 >
                   "Explore new technologies. Work with like-minded people. Build real-world projects."
                 </blockquote>
@@ -716,7 +706,7 @@ export default function App() {
       <section
         id="activities"
         className="py-28"
-        style={{ background: '#0d0d0d', position: 'relative', zIndex: 2 }}
+        style={{ background: '#1a1430', position: 'relative', zIndex: 2 }}
       >
         <div className="max-w-6xl mx-auto px-5">
           <div className="mb-14">
@@ -734,6 +724,7 @@ export default function App() {
                 fontFamily: 'Barlow Condensed, sans-serif',
                 fontSize: 'clamp(2.4rem, 6vw, 5rem)',
                 letterSpacing: '-0.02em',
+                color: '#fff7ec',
               }}
             >
               6 WAYS TO LEVEL
@@ -742,35 +733,165 @@ export default function App() {
             </h2>
           </div>
 
-          {/* gap-px with bg creates hairline grid borders without box-shadow noise */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: '#1c1c1c' }}>
-            {ACTIVITIES.map((act) => (
-              <div
-                key={act.label}
-                className="activity-card group p-8 relative transition-colors duration-300"
-                style={{ background: '#0d0d0d' }}
-              >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ background: 'rgba(232,57,14,0.03)' }}
-                />
-                <div className="text-3xl mb-5">{act.icon}</div>
-                <h3
-                  className="font-black text-[1.1rem] mb-3 text-white"
-                  style={{ fontFamily: 'Barlow Condensed, sans-serif', letterSpacing: '0.02em' }}
-                >
-                  {act.label}
-                </h3>
-                <p className="text-sm text-[#5a5a5a] leading-relaxed group-hover:text-[#777] transition-colors">
-                  {act.desc}
-                </p>
-                <div
-                  className="mt-5 h-px transition-all duration-400 group-hover:w-16"
-                  style={{ background: ORANGE, width: '2rem' }}
-                />
-              </div>
-            ))}
-          </div>
+          {/* ── Mobile: 2-col grid ── */}
+          {isMobile ? (
+            <div className="activity-card grid grid-cols-2 gap-px" style={{ background: '#5f4c66' }}>
+              {ACTIVITIES.map((act, i) => (
+                <div key={act.label} className="p-6" style={{ background: '#1a1430' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span
+                      className="px-2 py-0.5 rounded text-xs font-bold tracking-widest"
+                      style={{ fontFamily: 'JetBrains Mono, monospace', color: ORANGE, border: `1px solid ${ORANGE}28`, background: `${ORANGE}0d` }}
+                    >
+                      {act.tag}
+                    </span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.62rem', color: '#4a3865' }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <h3 className="font-black mb-2" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.1rem', color: '#fff7ec' }}>
+                    {act.label}
+                  </h3>
+                  <p className="text-xs leading-relaxed" style={{ color: '#9a8878' }}>{act.desc}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* ── Desktop: horizontal expand-on-hover ── */
+            <div
+              className="activity-card flex overflow-hidden"
+              style={{ height: 400, border: '1px solid #3d2e52' }}
+              onMouseLeave={() => setActiveActivity(-1)}
+            >
+              {ACTIVITIES.map((act, i) => {
+                const isActive = activeActivity === i
+                return (
+                  <div
+                    key={act.label}
+                    className="relative overflow-hidden cursor-pointer"
+                    style={{
+                      flex: isActive ? 5 : 1,
+                      minWidth: 0,
+                      borderRight: i < 5 ? '1px solid #3d2e52' : 'none',
+                      borderLeft: `2px solid ${isActive ? ORANGE : 'transparent'}`,
+                      background: isActive ? '#231831' : '#171326',
+                      transition: 'flex 0.5s cubic-bezier(0.4,0,0.2,1), background 0.4s, border-color 0.4s',
+                    }}
+                    onMouseEnter={() => setActiveActivity(i)}
+                  >
+                    {/* Collapsed: number + vertical title */}
+                    <div
+                      className="absolute inset-0 flex flex-col items-center justify-between py-7 px-3"
+                      style={{
+                        opacity: isActive ? 0 : 1,
+                        transition: 'opacity 0.18s',
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: 'JetBrains Mono, monospace',
+                          fontSize: '0.6rem',
+                          color: '#4a3865',
+                          letterSpacing: '0.08em',
+                        }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+
+                      <span
+                        style={{
+                          writingMode: 'vertical-rl',
+                          transform: 'rotate(180deg)',
+                          fontFamily: 'Barlow Condensed, sans-serif',
+                          fontWeight: 900,
+                          fontSize: '1rem',
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          whiteSpace: 'nowrap',
+                          color: ORANGE,
+                          background: `${ORANGE}14`,
+                          padding: '4px 6px',
+                          borderRadius: 2,
+                        }}
+                      >
+                        {act.label}
+                      </span>
+
+                      <span
+                        style={{
+                          width: 4,
+                          height: 4,
+                          borderRadius: '50%',
+                          background: '#3d2e52',
+                          display: 'block',
+                        }}
+                      />
+                    </div>
+
+                    {/* Expanded: full content */}
+                    <div
+                      className="absolute inset-0 p-8 flex flex-col justify-between"
+                      style={{
+                        opacity: isActive ? 1 : 0,
+                        transform: isActive ? 'translateX(0)' : 'translateX(-12px)',
+                        transition: 'opacity 0.3s 0.15s, transform 0.3s 0.15s',
+                        pointerEvents: isActive ? 'auto' : 'none',
+                      }}
+                    >
+                      <div>
+                        <div className="flex items-start justify-between mb-6">
+                          <span
+                            className="px-2 py-1 rounded"
+                            style={{
+                              fontFamily: 'JetBrains Mono, monospace',
+                              fontWeight: 700,
+                              fontSize: '0.7rem',
+                              letterSpacing: '0.12em',
+                              color: ORANGE,
+                              border: `1px solid ${ORANGE}30`,
+                              background: `${ORANGE}0d`,
+                            }}
+                          >
+                            {act.tag}
+                          </span>
+                          <span
+                            style={{
+                              fontFamily: 'JetBrains Mono, monospace',
+                              fontSize: '0.68rem',
+                              color: '#5f4c66',
+                              letterSpacing: '0.06em',
+                            }}
+                          >
+                            {String(i + 1).padStart(2, '0')} / 06
+                          </span>
+                        </div>
+                        <h3
+                          className="font-black mb-4 leading-none"
+                          style={{
+                            fontFamily: 'Barlow Condensed, sans-serif',
+                            fontSize: 'clamp(1.4rem, 2vw, 2rem)',
+                            letterSpacing: '-0.01em',
+                            color: '#fff7ec',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {act.label.toUpperCase()}
+                        </h3>
+                        <p
+                          className="text-sm leading-relaxed"
+                          style={{ color: '#9a8878', maxWidth: '30ch' }}
+                        >
+                          {act.desc}
+                        </p>
+                      </div>
+                      <div style={{ width: 40, height: 1, background: ORANGE }} />
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -779,7 +900,7 @@ export default function App() {
         id="shipaton"
         className="py-28 relative overflow-hidden"
         style={{
-          background: 'radial-gradient(ellipse 70% 55% at 30% 50%, rgba(232,57,14,0.065) 0%, transparent 70%), #0a0a0a',
+          background: 'radial-gradient(ellipse 70% 55% at 30% 50%, rgba(255,129,0,0.07) 0%, transparent 70%), #171326',
           zIndex: 2,
         }}
       >
@@ -815,6 +936,7 @@ export default function App() {
                   fontFamily: 'Barlow Condensed, sans-serif',
                   fontSize: 'clamp(3rem, 7vw, 6.5rem)',
                   letterSpacing: '-0.02em',
+                  color: '#fff7ec',
                 }}
               >
                 SHIPATON
@@ -822,7 +944,7 @@ export default function App() {
                 <span style={{ color: ORANGE }}>2026</span>
               </h2>
 
-              <p className="text-[#888] leading-relaxed mb-9 text-lg max-w-lg">
+              <p className="leading-relaxed mb-9 text-lg max-w-lg" style={{ color: '#a89280' }}>
                 The world's biggest mobile hackathon for people who actually ship. Launch real apps to real stores, compete for big prizes, and show the world what you built.
               </p>
 
@@ -836,17 +958,17 @@ export default function App() {
                   <div
                     key={item.label}
                     className="p-4 rounded-lg"
-                    style={{ background: '#111', border: '1px solid #1d1d1d' }}
+                    style={{ background: '#231831', border: '1px solid #5f4c66' }}
                   >
                     <div
-                      className="text-xs text-[#484848] mb-1 uppercase tracking-wider"
-                      style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                      className="text-xs mb-1 uppercase tracking-wider"
+                      style={{ color: '#8a7868', fontFamily: 'JetBrains Mono, monospace' }}
                     >
                       {item.label}
                     </div>
                     <div
-                      className="font-bold text-base text-white"
-                      style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
+                      className="font-bold text-base"
+                      style={{ fontFamily: 'Barlow Condensed, sans-serif', color: '#fff7ec' }}
                     >
                       {item.value}
                     </div>
@@ -857,15 +979,17 @@ export default function App() {
               <div className="flex flex-wrap gap-4">
                 <a
                   href="#join"
-                  className="px-7 py-3.5 font-semibold rounded text-white text-sm transition-all hover:brightness-110 active:scale-95"
-                  style={{ background: ORANGE }}
+                  className="px-7 py-3.5 font-semibold rounded text-sm transition-all hover:brightness-110 active:scale-95"
+                  style={{ background: ORANGE, color: '#171326' }}
                 >
                   Register for Shipaton →
                 </a>
                 <a
                   href="#"
-                  className="px-7 py-3.5 font-semibold rounded text-sm transition-colors hover:text-white"
-                  style={{ border: '1px solid #252525', color: '#666', background: 'transparent' }}
+                  className="px-7 py-3.5 font-semibold rounded text-sm transition-colors"
+                  style={{ border: '1px solid #5f4c66', color: '#a89280', background: 'transparent' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
                 >
                   Read the FAQ
                 </a>
@@ -878,7 +1002,7 @@ export default function App() {
                 <div
                   key={cat.title}
                   className="flex items-start gap-4 p-5 rounded-xl transition-all duration-200 group"
-                  style={{ background: '#0f0f0f', border: '1px solid #1a1a1a' }}
+                  style={{ background: '#1e1530', border: '1px solid #3d2e52' }}
                 >
                   <div className="mt-0.5 shrink-0">
                     <CrosshairSVG size={15} />
@@ -886,8 +1010,8 @@ export default function App() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 mb-1">
                       <span
-                        className="font-bold text-white text-[0.95rem]"
-                        style={{ fontFamily: 'Barlow Condensed, sans-serif' }}
+                        className="font-bold text-[0.95rem]"
+                        style={{ fontFamily: 'Barlow Condensed, sans-serif', color: '#fff7ec' }}
                       >
                         {cat.title}
                       </span>
@@ -902,7 +1026,7 @@ export default function App() {
                         {cat.tag}
                       </span>
                     </div>
-                    <p className="text-xs text-[#4e4e4e] leading-relaxed group-hover:text-[#666] transition-colors">
+                    <p className="text-xs leading-relaxed transition-colors" style={{ color: '#9a8878' }}>
                       {cat.desc}
                     </p>
                   </div>
@@ -917,7 +1041,7 @@ export default function App() {
       <section
         id="join"
         className="py-32 relative overflow-hidden"
-        style={{ background: '#0d0d0d', borderTop: '1px solid #181818', zIndex: 2 }}
+        style={{ background: '#1e1530', borderTop: '1px solid #3d2e52', zIndex: 2 }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
@@ -943,6 +1067,7 @@ export default function App() {
               fontFamily: 'Barlow Condensed, sans-serif',
               fontSize: 'clamp(3rem, 8vw, 7rem)',
               letterSpacing: '-0.02em',
+              color: '#fff7ec',
             }}
           >
             READY TO
@@ -950,22 +1075,24 @@ export default function App() {
             <span style={{ color: ORANGE }}>LAUNCH?</span>
           </h2>
 
-          <p className="text-[#777] text-lg leading-relaxed mb-11 max-w-lg mx-auto">
+          <p className="text-lg leading-relaxed mb-11 max-w-lg mx-auto" style={{ color: '#a89280' }}>
             Be part of a community that learns by doing. Whether you're a first-semester student or a final-year builder — there's a place for you.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="mailto:comet@example.com"
-              className="px-9 py-4 font-semibold rounded text-white text-sm transition-all hover:brightness-110 active:scale-95"
-              style={{ background: ORANGE }}
+              className="px-9 py-4 font-semibold rounded text-sm transition-all hover:brightness-110 active:scale-95"
+              style={{ background: ORANGE, color: '#171326' }}
             >
               Apply to Join →
             </a>
             <a
               href="#activities"
-              className="px-9 py-4 font-semibold rounded text-sm transition-colors hover:text-white"
-              style={{ border: '1px solid #242424', color: '#666', background: 'transparent' }}
+              className="px-9 py-4 font-semibold rounded text-sm transition-colors"
+              style={{ border: '1px solid #5f4c66', color: '#a89280', background: 'transparent' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#fff7ec')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#a89280')}
             >
               See What We Do
             </a>
@@ -976,8 +1103,8 @@ export default function App() {
       {/* ── FOOTER ────────────────────────────────────────────────────────────── */}
       <footer
         style={{
-          background: '#080808',
-          borderTop: '1px solid #181818',
+          background: '#120e20',
+          borderTop: '1px solid #3d2e52',
           position: 'relative',
           zIndex: 2,
         }}
@@ -986,7 +1113,7 @@ export default function App() {
           <div className="grid md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-2">
               <img src={cometLogo} alt="COMET" className="h-8 w-auto mb-5" />
-              <p className="text-sm text-[#484848] leading-relaxed max-w-sm">
+              <p className="text-sm leading-relaxed max-w-sm" style={{ color: '#7a6a60' }}>
                 Student-driven technical club of the Computer Department. Built by students who love technology, learning, and creating things that matter.
               </p>
               <div className="flex gap-5 mt-6">
@@ -994,8 +1121,10 @@ export default function App() {
                   <a
                     key={s}
                     href="#"
-                    className="text-xs text-[#3a3a3a] hover:text-[#777] transition-colors"
-                    style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                    className="text-xs transition-colors"
+                    style={{ color: '#6a5a50', fontFamily: 'JetBrains Mono, monospace' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#a89280')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#6a5a50')}
                   >
                     {s}
                   </a>
@@ -1005,15 +1134,21 @@ export default function App() {
 
             <div>
               <h4
-                className="text-xs text-[#444] uppercase tracking-widest mb-5"
-                style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                className="text-xs uppercase tracking-widest mb-5"
+                style={{ color: '#8a7868', fontFamily: 'JetBrains Mono, monospace' }}
               >
                 Club
               </h4>
               <ul className="flex flex-col gap-3">
                 {['About', 'Activities', 'Events', 'Shipaton 2026', 'Join'].map((l) => (
                   <li key={l}>
-                    <a href="#" className="text-sm text-[#444] hover:text-[#777] transition-colors">
+                    <a
+                      href="#"
+                      className="text-sm transition-colors"
+                      style={{ color: '#7a6a60' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#a89280')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#7a6a60')}
+                    >
                       {l}
                     </a>
                   </li>
@@ -1023,15 +1158,21 @@ export default function App() {
 
             <div>
               <h4
-                className="text-xs text-[#444] uppercase tracking-widest mb-5"
-                style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                className="text-xs uppercase tracking-widest mb-5"
+                style={{ color: '#8a7868', fontFamily: 'JetBrains Mono, monospace' }}
               >
                 Contact
               </h4>
               <ul className="flex flex-col gap-3">
                 {['Email Us', 'Instagram DM', 'Campus Office'].map((l) => (
                   <li key={l}>
-                    <a href="#" className="text-sm text-[#444] hover:text-[#777] transition-colors">
+                    <a
+                      href="#"
+                      className="text-sm transition-colors"
+                      style={{ color: '#7a6a60' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#a89280')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#7a6a60')}
+                    >
                       {l}
                     </a>
                   </li>
@@ -1040,10 +1181,10 @@ export default function App() {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-[#161616] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4" style={{ borderTop: '1px solid #2d1e3d' }}>
             <p
-              className="text-xs text-[#2e2e2e]"
-              style={{ fontFamily: 'JetBrains Mono, monospace' }}
+              className="text-xs"
+              style={{ color: '#5a4e55', fontFamily: 'JetBrains Mono, monospace' }}
             >
               © 2026 COMET — Computer Department Technical Club.
             </p>
